@@ -88,13 +88,14 @@
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa mem -t 40 input.fa ../01.cleandata/SRR32313567_R1.clean.fq.gz ../01.cleandata/SRR32313567_R2.clean.fq.gz | singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools sort -@ 40 -T tmp.illumina -o illumina.sort.bam
   
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools index illumina.sort.bam
-  java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome input.fa --frags illumina.sort.bam --diploid --outdir ./  --output genome 
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Pilon_2.14.sif  java -jar java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome input.fa --frags illumina.sort.bam --diploid --outdir ./  --output genome 
   
   # 第二次使用pilon纠错 error correction again
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa index genome.fasta
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa mem -t 40 genome.fasta ../01.cleandata/SRR32313567_R1.clean.fq.gz ../01.cleandata/SRR32313567_R2.clean.fq.gz | singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools sort -@ 40 -T tmp.illumina -o illumina.sort.bam
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools index illumina.sort.bam
-  java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome genome.fasta --frags illumina.sort.bam --diploid --outdir ./  --output assembly
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Pilon_2.14.sif  java -jar java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome genome.fasta --frags illumina.sort.bam --diploid --outdir ./  --output assembly
+
   
   # 这里，我们得到了assembly.fasta（组装结果），用于后续分析。如果没有二代数据，则运行下一步 Here, we have obtained assembly.fasta (assembly results) for subsequent analysis. If there is no second-generation data, proceed to the next step
   # ln -s flye/racon1.fa assembly.fasta
@@ -245,7 +246,7 @@
   
   # 基因岛注释 gene island annotation
   mkdir island;cd island
-  singularity exec /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/island.sif python /opt/Island/Dimob.py -i ../prokka_out/SRR32313567.gbk -o ./ -d /opt/Island/islandpath/Dimob.pl   
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/island.sif python /opt/Island/Dimob.py -i ../prokka_out/SRR32313567.gbk -o ./ -d /opt/Island/islandpath/Dimob.pl   
   cd ../
   
   # 前噬菌体注释 prophage annotaiton
@@ -318,7 +319,7 @@
   
   # 信号肽预测 Signal peptide prediction
   mkdir SignalP;cd SignalP
-  singularity exec /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/sravankrishna47_signalp-fast.sif signalp6 --fastafile ../../03.anno/prokka_out/SRR32313567.fna  --organism other --output_dir  ./ --format txt --mode fast
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/sravankrishna47_signalp-fast.sif signalp6 --fastafile ../../03.anno/prokka_out/SRR32313567.fna  --organism other --output_dir  ./ --format txt --mode fast
   cd ../
   
   # 跨膜蛋白预测 Transmembrane protein prediction
@@ -328,13 +329,13 @@
   
   # Ⅲ 型分泌系统效应蛋白注释 Annotation of type III secretion system effector proteins
   mkdir EffectiveT3;cd EffectiveT3
-  singularity exec /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/EffectiveT3.sif  java -jar /opt/TTSS_GUI-1.0.1.jar -m /opt/TTSS_STD-2.0.2.jar -f ../../03.anno/prokka_out/SRR32313567.faa -q  -t selective -o result.txt
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/EffectiveT3.sif  java -jar /opt/TTSS_GUI-1.0.1.jar -m /opt/TTSS_STD-2.0.2.jar -f ../../03.anno/prokka_out/SRR32313567.faa -q  -t selective -o result.txt
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/filter_effective.py result.txt filter_result.txt
   cd ../
   
   # 启动子预测  基因组、窗口大小、软件路径 Promoter prediction genome, window size, software path
   mkdir PromPredict;cd PromPredict
-  python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/PromPredict.py ../../03.anno/prokka_out/SRR32313567.fna 100 /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/PromPredict.py ../../03.anno/prokka_out/SRR32313567.fna 100 /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software
   cd -
   
   # ICE预测 Integrative and Conjugative Elements
@@ -388,7 +389,7 @@
   #venn 同源基因组基因韦恩图绘制 Drawing of Venn diagram of homologous genome genes
   mkdir venn;cd venn
   singularity exec -B /data6 /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/plot1.sif Rscript /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/venn.R ../ortho/ortho/*/Orthogroups/Orthogroups.GeneCount.tsv Pchl,Pcic,Pent,SRR32313567
-  
+  cd ../
   # jcvi共线性分析 JCVI collinearity analysis
   mkdir jcvi;cd jcvi
     
@@ -409,7 +410,7 @@
   /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/seqkit grep -f <(cut -f 4 SRR32313567.uniq.bed) ../../../03.anno/prokka_out/SRR32313567.ffn -i|/data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/seqkit seq -i  >SRR32313567.cds
   cd ../
   ln -s  input/Pchl.uniq.bed Pchl.bed
-  ln -s input/ Pcic.uniq.bed Pcic.bed
+  ln -s input/Pcic.uniq.bed Pcic.bed
   ln -s input/SRR32313567.uniq.bed SRR32313567.bed
   ln -s input/*cds .
   singularity exec -B /data6 /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/jcvi_w_last_latest.sif python -m jcvi.compara.catalog ortholog --dbtype nucl  Pchl SRR32313567  --no_strip_names
@@ -432,7 +433,7 @@
   # gtdbtk系统发育学分类与注释 gtdbtk phylogenetic classification and annotation
   mkdir gtdbtk;cd gtdbtk
   cp ../../03.anno/prokka_out/SRR32313567.fna  ../../../input/genome
-  singularity exec -B /data6 /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/gtdbtk_2.3.0_r214.sif gtdbtk classify_wf --genome_dir ../../../input/genome  --out_dir output/classify_wf --extension fasta --prefix bac --cpu 40 --skip_ani_screen
+  singularity exec -B /data6 /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/gtdbtk_2.3.0_r214.sif gtdbtk classify_wf --genome_dir ../../../input/genome  --out_dir output/classify_wf --extension fna --prefix bac --cpu 40 --skip_ani_screen
   cd ../
  
   # pyani平均核苷酸相似度分析 Pyani average nucleotide similarity analysis
