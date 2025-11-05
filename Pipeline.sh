@@ -63,11 +63,11 @@
   # 下面3个命令运行1个 The following three commands run 1
   # 若同时使用长短读长数据，则使用该命令拼接(For Hybrid Long read and Short read Data)
   # 使用unicycler 混合拼接Long-read 和 Short-read 数据 assembly genome using Unicycler by Hybrid Long read and Short read Data strategy
-  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/unicycler_v0.5.1.sif unicycler -1 ../01.cleandata/SRR32313567_R1.clean.fq.gz -2 ../01.cleandata/SRR32313567_R2.clean.fq.gz -l ../01.cleandata/SRR32313567.filtered.fastq -o unicycler_out -t 46 --keep 1 --mode conservative
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/unicycler_v0.5.1.sif unicycler -1 ../01.cleandata/SRR32313567_R1.clean.fq.gz   -2 ../01.cleandata/SRR32313567_R2.clean.fq.gz   -l ../01.cleandata/SRR32313567.filtered.fastq -o unicycler_out -t 46 --keep 1 --mode conservative
   
   # 若仅使用短读长拼接，则使用该命令 (For Short-read Only data)
   # 使用unicycler对Short-read-Only数据进行拼接 Assembling Short-read Only data using unicycler
-   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/unicycler_v0.5.1.sif unicycler -1 ../01.cleandata/SRR32313567_R1.clean.fq.gz-2 ../01.cleandata/SRR32313567_R2.clean.fq.gz -o unicycler_short -t 46 --keep 1 --mode conservative
+   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/unicycler_v0.5.1.sif unicycler   -1 ../01.cleandata/SRR32313567_R1.clean.fq.gz  -2 ../01.cleandata/SRR32313567_R2.clean.fq.gz -o unicycler_short -t 46 --keep 1 --mode conservative
   
   # 若仅有Long-read数据，则使用该命令进行拼接 (For Long-read Only data)
   # 使用flye拼接基因组 Using Flye to assembly Genomes
@@ -81,6 +81,8 @@
   # link assembly_result   下面2个命令运行1个 The following two commands run 1
   ln -s unicycler_out/assembly.fasta input.fa
   ln -s flye/racon1.fa input.fa
+
+  # 脚本里面是有两轮pilon纠错，第一轮输出是genome.fasta，第二轮是assembly.fasta，这样纠错完组装文件染色体id是1_pilon_pilon There are two rounds of Pilon polishing in this script. The first round outputs genome.fasta, and the second round outputs assembly.fasta. After both polishing steps are completed, the final chromosome ID in the assembled file becomes 1_pilon_pilon
   
   # 使用pilon纠错  比完直接输出sorted.bam，纠错2轮 Output sorted.bam directly after comparison, and perform 2 rounds of error correction
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa index input.fa
@@ -241,7 +243,7 @@
   
   # 使用BioMGCore统计antismash结果 Use BioMGCore to analyze and summarize antismash results.
   mkdir BioMGCore;cd BioMGCore
-  python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/BioMGCore/antiSTAT.py -i /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/03.anno/antismash/  -o ./statistics.xlsx
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/BioMGCore/antiSTAT.py -i /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/03.anno/antismash/  -o ./statistics.xlsx
   cd ../
   
   # 基因岛注释 gene island annotation
@@ -349,6 +351,7 @@
   mkdir -p /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/05.circlize;cd /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/05.circlize
     
   # 基因组圈图 genome circle diagram
+  cat ../02.assembly/aln3_2kbin.xls|cut -f 1 |uniq # 显示序列id，选取想要绘制圈图的序列替换下面脚本中的1_pilon_pilon进行后续的圈图绘制，流程中使用画图序列为1_pilon_pilon  Display the sequence IDs, then select the target sequence intended for circos plotting and replace 1_pilon_pilon in the following script accordingly. In this workflow, the sequence used for figure generation is 1_pilon_pilon
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/first.py ../02.assembly/GCstat.xls tmp_GCstat.xls '1_pilon_pilon'
   less ../03.anno/prokka_out/SRR32313567.gff|awk 'NF>2'|sed -E 's/gnl\|Bacteria\|ctg_([0-9]+)/\1_pilon_pilon/g' > SRR32313567.gff
   singularity exec -B /data6 /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/plot1.sif Rscript /data6/zhangtianyuan/Pipeline/Train_bac_genome/Train-Bacteria-genome/script/circle_plot.r SRR32313567 ./ 2000 SRR32313567.gff ../02.assembly/aln3_2kbin.xls ../02.assembly/aln3_depth.xls ../02.assembly/aln2_2kbin.xls ../02.assembly/aln2_depth.xls tmp_GCstat.xls '1_pilon_pilon'
