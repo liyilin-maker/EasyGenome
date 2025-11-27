@@ -90,13 +90,13 @@
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa mem -t 40 input.fa ../01.cleandata/SRR32313567_R1.clean.fq.gz ../01.cleandata/SRR32313567_R2.clean.fq.gz | singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools sort -@ 40 -T tmp.illumina -o illumina.sort.bam
   
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools index illumina.sort.bam
-  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/Pilon_2.14.sif  java -jar java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome input.fa --frags illumina.sort.bam --diploid --outdir ./  --output genome 
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/Pilon_2.14.sif  java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome input.fa --frags illumina.sort.bam --diploid --outdir ./  --output genome 
   
   # 第二次使用pilon纠错 error correction again
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa index genome.fasta
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa mem -t 40 genome.fasta ../01.cleandata/SRR32313567_R1.clean.fq.gz ../01.cleandata/SRR32313567_R2.clean.fq.gz | singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools sort -@ 40 -T tmp.illumina -o illumina.sort.bam
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/samtools_1.17.sif samtools index illumina.sort.bam
-  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/Pilon_2.14.sif  java -jar java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome genome.fasta --frags illumina.sort.bam --diploid --outdir ./  --output assembly
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/Pilon_2.14.sif  java -jar /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Software/pilon-1.24.jar --fix bases --genome genome.fasta --frags illumina.sort.bam --diploid --outdir ./  --output assembly
 
   
   # 这里，我们得到了assembly.fasta（组装结果），用于后续分析。如果没有二代数据，则运行下一步 Here, we have obtained assembly.fasta (assembly results) for subsequent analysis. If there is no second-generation data, proceed to the next step
@@ -128,7 +128,7 @@
   singularity exec -B /data6/ --env MERQURY=/usr/local/share/merqury/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/merqury_v1.3.sif meryl count k=21 output read3.meryl ../../01.cleandata/SRR32313567.filtered.fastq
   singularity exec -B /data6/ --env MERQURY=/usr/local/share/merqury/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/merqury_v1.3.sif meryl  union-sum output illumina.meryl read1.meryl read2.meryl 
   singularity exec -B /data6/ --env MERQURY=/usr/local/share/merqury/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/merqury_v1.3.sif meryl  union-sum output all.meryl illumina.meryl read3.meryl
-  singularity exec -B /data6/ --env MERQURY=/usr/local/share/merqury/   /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/merqury_v1.3.sif    bash /usr/local/share/merqury/merqury.sh all.meryl ../assemble/assembly.fasta  assembly
+  singularity exec -B /data6/ --env MERQURY=/usr/local/share/merqury/  /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/merqury_v1.3.sif   bash /usr/local/share/merqury/merqury.sh all.meryl ../assemble/assembly.fasta  assembly
   cd ..
   
   # 深度统计 Depth statistics
@@ -264,7 +264,7 @@
 
 ## Step04.Advanced_functional_annotation
   
-  # 创建目录 Create directory
+  # 创建主目录 Create directory
   mkdir -p /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/04.specific;
   cd /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/04.specific
   
