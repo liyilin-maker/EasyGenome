@@ -511,7 +511,11 @@
       #done
     
       #把近缘基因组的prokka注释得到的gff文件都复制到/data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/03.anno/roary目录
-      #singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/roary_v3.9.1.sif roary  --mafft -p 8  *.gff 
+      #singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/roary_v3.9.1_addlibbz2.sif roary  --mafft -p 8  *.gff 
+      #结果统计图绘制 Result statistical graph drawing
+      singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/roary_pie.py
+      singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/stat_roary.py
+      Rscript /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/ggplot_plot_V1.r
 
 ## Step08.MLST analysis
   # mlst分析 
