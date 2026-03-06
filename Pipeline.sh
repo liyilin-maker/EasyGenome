@@ -465,6 +465,9 @@
 
 ## Step07.Pan-genome analysis
   # 泛基因组分析 Pan-genome analysis
+  # ncbi上下载近缘gbff格式文件，存放到{工作目录}/input/roary/下，运行下面这条命令生成带序列的gff格式：
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/ubuntu_v24_bioperl.sif bash -c "export PERL5LIB=/opt/miniconda3/lib/perl5/5.22.2/:/opt/miniconda3/lib/perl5/site_perl/5.22.0/ && /opt/miniconda3/bin/perl /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/genbank2gff3.pl -o output1 *gbff " Download GBFF format files of closely related species from NCBI, save them to {working directory}/input/roary/, and run the command to generate GFF format files with sequences.
+  
   mkdir -p /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/07.roary;cd /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/07.roary
   cp ../03.anno/prokka_out/*gff ../../input/roary/
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/roary_v3.9.1_addlibbz2.sif  bash -c 'export LC_ALL=C && export LANG=C && roary   -e --mafft -p 40  ../../input/roary/*gff'
