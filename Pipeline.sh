@@ -474,6 +474,7 @@
   # 结果统计图绘制 Result statistical graph drawing
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/roary_pie.py
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/stat_roary.py
+   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/ubuntu_v24_r.sif bash -c "export PATH=/opt/miniconda/bin:/usr/bin/ && Rscript /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/ggplot_plot_V1.r " 
     cd - 
 
    # 备选方案：如果没有GFF文件，需要进行注释，参考下列文档
