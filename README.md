@@ -2,9 +2,9 @@
 
 a user-friendly and flexible pipeline for prokaryote genome analysis （一种用户友好且灵活的原核生物基因组分析管道）
 
-Version：v1.00
+Version：v1.30
 
-Update：2025/10/27
+Update：2026/06/10
 
 # Pipeline manual and file description (流程使用和文件介绍)
 
