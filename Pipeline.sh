@@ -59,7 +59,8 @@
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/jellyfish_v2.2.10.sif jellyfish stats kmer15 -o kmer15.stat
   # 使用genomescope评估基因组大小 Assessing genome size using genomescope
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/ime_genomescope_v1.0.0.sif /opt/genomescope/genomescope.R kmer15.histo 15 150 ./genomescope 100000 verbose > genomescope_print.txt
-  
+
+  # 组装，20m~几小时不等，具体耗时会受到实际可用运行线程数量影响，请耐心等待 20 minutes to several hours. The actual runtime depends on the number of available threads. Please wait patiently
   # 下面3个命令运行1个 The following three commands run 1
   # 若同时使用长短读长数据，则使用该命令拼接(For Hybrid Long read and Short read Data)
   # 使用unicycler 混合拼接Long-read 和 Short-read 数据 assembly genome using Unicycler by Hybrid Long read and Short read Data strategy
@@ -73,6 +74,7 @@
   # 使用flye拼接基因组 Using Flye to assembly Genomes
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/flye_2.9.2.sif flye --nano-raw ../01.cleandata/SRR32313567.filtered.fastq --out-dir flye --threads 40 --iterations 5
   # 使用racon对拼接结果进行矫正  Correct the draft genome using racon
+  # racon纠错运行大约需要 2~10 分钟，具体耗时会受到实际可用运行线程数量影响，请耐心等待 Racon polishing typically takes approximately 2–10 minutes. The actual runtime may vary depending on the number of available threads. Please wait patiently
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/minimap2_2.24.sif minimap2 -d ref1.mmi flye/assembly.fasta
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/minimap2_2.24.sif minimap2 -ax map-ont -t 40 ref1.mmi ../01.cleandata/SRR32313567.filtered.fastq > map1.sam
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/canu-racon_2.0.sif racon -t 40 ../01.cleandata/SRR32313567.filtered.fastq map1.sam flye/assembly.fasta > flye/racon1.fa
@@ -83,7 +85,7 @@
   ln -s flye/racon1.fa input.fa
 
   # 脚本里面是有两轮pilon纠错，第一轮输出是genome.fasta，第二轮是assembly.fasta，这样纠错完组装文件染色体id是1_pilon_pilon There are two rounds of Pilon polishing in this script. The first round outputs genome.fasta, and the second round outputs assembly.fasta. After both polishing steps are completed, the final chromosome ID in the assembled file becomes 1_pilon_pilon
-  
+  # pilon纠错运行大约需要 2~10 分钟，具体耗时会受到实际可用运行线程数量影响，请耐心等待 requires approximately 2–10 minutes. The actual runtime may vary depending on the number of available threads. Please wait patiently.
   # 使用pilon纠错  比完直接输出sorted.bam，纠错2轮 Output sorted.bam directly after comparison, and perform 2 rounds of error correction
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/bwa-samtools_0.7.12_1.2.1.sif bwa index input.fa
   
@@ -463,12 +465,16 @@
 
 ## Step07.Pan-genome analysis
   # 泛基因组分析 Pan-genome analysis
+  # ncbi上下载近缘gbff格式文件，存放到{工作目录}/input/roary/下，运行下面这条命令生成带序列的gff格式：
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/ubuntu_v24_bioperl.sif bash -c "export PERL5LIB=/opt/miniconda3/lib/perl5/5.22.2/:/opt/miniconda3/lib/perl5/site_perl/5.22.0/ && /opt/miniconda3/bin/perl /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/genbank2gff3.pl -o output1 *gbff " Download GBFF format files of closely related species from NCBI, save them to {working directory}/input/roary/, and run the command to generate GFF format files with sequences.
+  
   mkdir -p /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/07.roary;cd /data6/zhangtianyuan/Pipeline/EasyGenome/SRR32313567/07.roary
   cp ../03.anno/prokka_out/*gff ../../input/roary/
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/roary_v3.9.1_addlibbz2.sif  bash -c 'export LC_ALL=C && export LANG=C && roary   -e --mafft -p 40  ../../input/roary/*gff'
   # 结果统计图绘制 Result statistical graph drawing
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/roary_pie.py
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/python39pandas_pexpect_Bio_PromPredict_r.sif python /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/stat_roary.py
+   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/ubuntu_v24_r.sif bash -c "export PATH=/opt/miniconda/bin:/usr/bin/ && Rscript /data6/zhangtianyuan/Pipeline/EasyGenome/Public/script/ggplot_plot_V1.r " 
     cd - 
 
    # 备选方案：如果没有GFF文件，需要进行注释，参考下列文档
