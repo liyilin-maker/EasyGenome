@@ -116,7 +116,7 @@
   # 使用QUAST对组装结果进行评估与统计 Evaluate and analyze the assembly results using QUAST.
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/quast_5.2.0.sif quast.py -o quast -t 40 assemble/assembly.fasta
   # 使用CheckM对组装结果进行评估与统计 Evaluate and analyze the assembly results using CheckM. 
-  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/checkm.v1.1.3.sif checkm lineage_wf unicycler_out/ checkmout/ -x fasta -t 48  --pplacer_threads 8 --tab_table -f checkmout/checkm.txt
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/checkm.v1.1.3.sif checkm lineage_wf assemble/ checkmout/ -x fasta -t 48  --pplacer_threads 8 --tab_table -f checkmout/checkm.txt
   # 使用BUSCO对组装结果进行评估与统计 Evaluate and analyze the assembly results using BUSCO.
   singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/staphb_busco_6.0.0-prok-bacteria_odb12_2024-11-14.sif  busco -o busco -i assemble/assembly.fasta -l /busco_downloads/lineages/bacteria_odb12  -m geno -c 40
   
