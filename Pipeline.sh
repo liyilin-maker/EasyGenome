@@ -323,7 +323,7 @@
   
   # 信号肽预测 Signal peptide prediction
   mkdir SignalP;cd SignalP
-  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/sravankrishna47_signalp-fast.sif signalp6 --fastafile ../../03.anno/prokka_out/SRR32313567.fna  --organism other --output_dir  ./ --format txt --mode fast
+  singularity exec -B /data6/ /data6/zhangtianyuan/Pipeline/EasyGenome/Public/Singularity/sravankrishna47_signalp-fast.sif signalp6 --fastafile ../../03.anno/prokka_out/SRR32313567.faa  --organism other --output_dir  ./ --format txt --mode fast
   cd ../
   
   # 跨膜蛋白预测 Transmembrane protein prediction
